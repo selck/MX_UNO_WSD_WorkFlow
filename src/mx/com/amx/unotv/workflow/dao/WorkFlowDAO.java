@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import mx.com.amx.unotv.workflow.dto.ContentDTO;
+import mx.com.amx.unotv.workflow.dto.ExtraInfoContentDTO;
 
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
@@ -95,6 +96,47 @@ public class WorkFlowDAO {
 		}
 		
 		return idContenido;
+	}
+	
+	public  ExtraInfoContentDTO getExtraInfoContent(String friendlyURL ) 
+	{
+		ExtraInfoContentDTO respuesta=new ExtraInfoContentDTO();
+		StringBuffer sbQuery = new StringBuffer();
+		try {
+			sbQuery.append("SELECT   ");
+			sbQuery.append("CASE  ");
+			sbQuery.append("WHEN TS.FC_ID_TIPO_SECCION ='especiales' THEN   ");
+			sbQuery.append("('http://www.unotv.com/'||COALESCE(TS.FC_ID_TIPO_SECCION,'')||'/'||COALESCE(S.FC_FRIENDLY_URL,'')||'/'||COALESCE(C.FC_FRIENDLY_URL,'')||'/detalle/'|| COALESCE(N.FC_NOMBRE,'')) ||'/' ");
+			sbQuery.append("ELSE "); 
+			sbQuery.append("('http://www.unotv.com/'||COALESCE(TS.FC_ID_TIPO_SECCION,'')||'s/'||COALESCE(S.FC_FRIENDLY_URL,'')||'/'||COALESCE(C.FC_FRIENDLY_URL,'')||'/detalle/'|| COALESCE(N.FC_NOMBRE,'')) ||'/' ");
+			sbQuery.append("END as url_nota,  ");
+			sbQuery.append("C.FC_RUTA_DFP_APP as ruta_dfp,    ");
+			sbQuery.append("C.FC_DESCRIPCION as desc_categoria,  ");
+			sbQuery.append("S.FC_DESCRIPCION as desc_seccion ");
+			sbQuery.append("FROM WPDB2INS.UNO_MX_H_NOTA N,     ");
+			sbQuery.append("WPDB2INS.UNO_MX_C_TIPO_SECCION TS,  ");  
+			sbQuery.append("WPDB2INS.UNO_MX_C_SECCION S,    ");
+			sbQuery.append("WPDB2INS.UNO_MX_C_CATEGORIA  C ");   
+			sbQuery.append("WHERE  ");
+			sbQuery.append("C.FC_ID_CATEGORIA=N.FC_ID_CATEGORIA    ");
+			sbQuery.append("AND C.FC_ID_SECCION=S.FC_ID_SECCION AND S.FC_ID_TIPO_SECCION=TS.FC_ID_TIPO_SECCION    ");
+			sbQuery.append("AND N.FC_NOMBRE = ? ");
+			
+			List< ExtraInfoContentDTO > list=jdbcTemplate.query ( sbQuery.toString() ,
+					new Object [] { friendlyURL,} , 
+					new BeanPropertyRowMapper<ExtraInfoContentDTO>( ExtraInfoContentDTO.class) );
+			
+			if(list!=null && list.size()>0)
+				respuesta=list.get(0);
+				
+		} catch (Exception e) {
+			
+			log.error(" Error getExtraInfoContent [DAO] ",e );
+			log.error("SQL: "+sbQuery);
+			log.error("friendlyURL: "+friendlyURL);
+		}
+		
+		return respuesta;
 	}
 	
 	public boolean deleteNotaTag(final String pstIdContenido){

@@ -6,6 +6,7 @@ import java.util.List;
 import mx.com.amx.unotv.workflow.dao.ImagesDAO;
 import mx.com.amx.unotv.workflow.dao.WorkFlowDAO;
 import mx.com.amx.unotv.workflow.dto.ContentDTO;
+import mx.com.amx.unotv.workflow.dto.ExtraInfoContentDTO;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +191,18 @@ public class WorkFlowController {
 		return resultado;
 	}
 	
+	@RequestMapping(value={"getExtraInfoContent"}, method={org.springframework.web.bind.annotation.RequestMethod.POST}, headers={"Accept=application/json"})
+	@ResponseBody
+	public ExtraInfoContentDTO getExtraInfoContent(@RequestBody String friendlyURL){
+		ExtraInfoContentDTO extraInfoContentDTO=new ExtraInfoContentDTO();
+		try{
+			extraInfoContentDTO = this.workFlowDAO.getExtraInfoContent(friendlyURL);
+		}
+		catch (Exception e){
+			logger.error(" Error WorkFlowController [getExtraInfoContent ]:", e);
+		}
+		return extraInfoContentDTO;
+	}
 	/**
 	 * @return the workFlowDAO
 	 */
